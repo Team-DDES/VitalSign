@@ -14,6 +14,9 @@ import {
 import Fili from 'fili';
 import { fft, pow, sqrt } from 'mathjs';
 import { CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit';
+import Web3 from 'web3';
+import { AbiItem } from 'web3-utils';
+import { Contract } from 'web3-eth-contract';
 import Header from '../components/header';
 import styles from '../styles/Home.module.scss';
 import tensorStore from '../lib/tensorStore';
@@ -21,7 +24,8 @@ import Preprocessor from '../lib/preprocessor';
 import Posprocessor from '../lib/posprocessor';
 
 import testAbi from '../../testabi.json';
-import Web3 from "web3";
+// import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../contracts/config';
+import contractInfo from '../contracts/BiometricContract.json';
 const postprocessor = new Posprocessor(tensorStore);
 const preprocessor = new Preprocessor(tensorStore, postprocessor);
 
@@ -49,14 +53,13 @@ function getHeartRateFromPPG({
   // FFT 라이브러리를 사용하여 FFT 수행
 
   const signal = Array.from(ppgSignal); // Float32Array를 Array로 변환
-  const spectrum:any= fft(signal);
+  const spectrum: any = fft(signal);
   const startFrequency = min; // 심장박동 주파수 범위의 시작값
   const endFrequency = max; // 심장박동 주파수 범위의 종료값
 
   // 주파수 대역에서 최대값을 찾습니다.
   let maxAmplitude = -Infinity;
   let maxFrequency = 0;
-
 
   // 주파수 대역 내에서 최대값을 찾습니다.
   for (let i = 0; i < spectrum.length; i++) {
@@ -99,6 +102,9 @@ const Home = () => {
   const [countDown, setCountDown] = useState(time);
   const [heartrate, setheartrate] = useState(0);
   const [resipration, setresipration] = useState(0);
+  const [account, setAccount] = useState<string>('');
+  const [w3, setW3] = useState<Web3 | undefined>(undefined);
+  const [contract, setContract] = useState<Contract | undefined>(undefined);
 
   useEffect(
     () => () => {
@@ -122,17 +128,46 @@ const Home = () => {
     []
   );
 
+  useEffect(() => {
+    async function load() {
+      const w3Instance = new Web3(Web3.givenProvider);
+      const accounts = await w3Instance.eth.requestAccounts();
+      setAccount(accounts[0]);
+      setW3(w3Instance);
+      // const bioContract = new Contract(
+      //   CONTRACT_ABI as AbiItem[],
+      //   CONTRACT_ADDRESS
+      // );
+      // console.log(bioContract);
+      const bioContract = new w3Instance.eth.Contract(
+        contractInfo.abi as AbiItem[],
+        contractInfo.networks['5777'].address
+      );
+      // console.log(bioContract);
+      console.log(bioContract);
+      setContract(bioContract);
+    }
+
+    load();
+  }, []);
+
+  useEffect(() => {
+    console.log(w3, account, contract);
+  }, [w3, account, contract]);
+
   const connectToMetaMask = async () => {
     if (typeof window.ethereum !== 'undefined') {
       // Metamask가 설치되어 있는 경우
-      await window.ethereum.request({method: 'eth_requestAccounts'});
-      const web3 = new Web3(window.ethereum);
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      });
+      const w3 = new Web3(window.ethereum);
       // 이제 web3를 사용하여 Metamask와 상호작용할 수 있습니다.
     } else {
       // Metamask가 설치되어 있지 않은 경우 또는 사용자가 거부한 경우
       console.error('Please install Metamask');
     }
-  }
+  };
 
   const startRecording = async () => {
     await postprocessor.loadModel();
@@ -275,34 +310,29 @@ const Home = () => {
       <Header />
       <div className={styles.homeContainer}>
         <div className={styles.contentContainer}>
-          <h3>
-            rPPG is a method to extract BVP from the face.
-          </h3>
+          <h3>rPPG is a method to extract BVP from the face.</h3>
           <h4 style={{ color: 'red' }}>
             Please place your face inside of the red box and keep stationary for
             5 seconds
           </h4>
           <div className={styles.buttonContainer}>
-          {!isRecording && (
+            {!isRecording && (
+              <button
+                className={styles.recordingButton}
+                onClick={startRecording}
+                type="button"
+              >
+                Start Monitoring
+              </button>
+            )}
             <button
-              className={styles.recordingButton}
-              onClick={startRecording}
-              type="button"
-            >
-              Start Monitoring
-            </button>
-          )}
-          <button
               className={styles.recordingButton}
               onClick={connectToMetaMask}
               type="button"
-          >
-            MetaMask
-          </button>
-            <button
-              className={styles.recordingButton}
-              type="button"
             >
+              MetaMask
+            </button>
+            <button className={styles.recordingButton} type="button">
               Send Information
             </button>
           </div>

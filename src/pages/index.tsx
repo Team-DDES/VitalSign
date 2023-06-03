@@ -9,11 +9,11 @@ import {
   tidy,
   dispose,
   cumsum,
-  reshape
+  reshape, addStrict
 } from '@tensorflow/tfjs';
 import Fili from 'fili';
 import { fft, pow, sqrt } from 'mathjs';
-import { CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit';
+import {CredentialType, IDKitWidget, ISuccessResult, useIDKit} from '@worldcoin/idkit';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 import { Contract } from 'web3-eth-contract';
@@ -90,6 +90,7 @@ type GraphProps = {
 };
 
 const Home = () => {
+  const {open, setOpen} = useIDKit();
   const webcamRef = React.useRef<any>(null);
   const intervalId = React.useRef<NodeJS.Timeout>();
   const coutdownIntervalId = React.useRef<NodeJS.Timeout>();
@@ -105,9 +106,12 @@ const Home = () => {
   const [account, setAccount] = useState<string>('');
   const [w3, setW3] = useState<Web3 | undefined>(undefined);
   const [contract, setContract] = useState<Contract | undefined>(undefined);
+  const [docterAddr, setDocterAddr] = useState<string>("");
+  const [comment, setComment] = useState<string>("");
 
   useEffect(
     () => () => {
+      setOpen(true);
       if (intervalId.current) {
         clearInterval(intervalId.current);
       }
@@ -141,10 +145,12 @@ const Home = () => {
       // console.log(bioContract);
       const bioContract = new w3Instance.eth.Contract(
         contractInfo.abi as AbiItem[],
-        contractInfo.networks['5777'].address
+        contractInfo.networks['1337'].address
       );
       // console.log(bioContract);
       console.log(bioContract);
+      const docterComment = await bioContract.methods.getComment().call();
+      console.log(docterComment);
       setContract(bioContract);
     }
 
@@ -154,6 +160,29 @@ const Home = () => {
   useEffect(() => {
     console.log(w3, account, contract);
   }, [w3, account, contract]);
+
+
+  const sendBiometric = async () =>{
+    // console.log(contract)
+    if ( heartrate == 0 && resipration == 0 ){
+      return;
+    }
+    let bioArray = [];
+    const hr = w3?.utils.stringToHex(w3?.utils.rightPad(heartrate.toString(),32));
+    const rr = w3?.utils.stringToHex(w3?.utils.rightPad(resipration.toString(),32));
+    const stress= w3?.utils.stringToHex(w3?.utils.rightPad("High",32));
+    const sp = w3?.utils.stringToHex(w3?.utils.rightPad("98",32));
+    const comment = w3?.utils.stringToHex(w3?.utils.rightPad("normal",32));
+    bioArray.push(hr)
+    bioArray.push(rr)
+    bioArray.push(stress)
+    bioArray.push(sp)
+    console.log(comment)
+    // @ts-ignore
+    await contract.methods.sendBiometricData(bioArray,comment,docterAddr).send( {
+      "from": account,
+    });
+  }
 
   const connectToMetaMask = async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -290,6 +319,14 @@ const Home = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
   });
+
+  const handledocterAddr = (e)=>{
+    setDocterAddr(e.target.value);
+
+  }
+  useEffect(()=>{
+    console.log(docterAddr);
+  },[docterAddr])
   // const urlParams = new URLSearchParams(window.location.search);
 
   // const credential_types = (urlParams.get("credential_types")?.split(",") as CredentialType[]) ?? [
@@ -299,7 +336,7 @@ const Home = () => {
 
   // const action = urlParams.get("action") ?? "";
   // const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
-  const action = JSON.stringify(testAbi);
+  const action ="";// JSON.stringify(testAbi);
 
   return (
     <>
@@ -315,6 +352,7 @@ const Home = () => {
             Please place your face inside of the red box and keep stationary for
             5 seconds
           </h4>
+          <p className={styles.countdown}>comment:{comment}</p>
           <div className={styles.buttonContainer}>
             {!isRecording && (
               <button
@@ -332,10 +370,13 @@ const Home = () => {
             >
               MetaMask
             </button>
-            <button className={styles.recordingButton} type="button">
+            <button className={styles.recordingButton}
+                    onClick={sendBiometric}
+                    type="button">
               Send Information
             </button>
           </div>
+          <input placeholder={"doctor's wallet address"} onChange={handledocterAddr}/>
           {/* <div
             className="App"
             style={{
@@ -357,10 +398,10 @@ const Home = () => {
               {({ open }) => <button onClick={open}>Click me</button>}
             </IDKitWidget>
           </div> */}
+
           <IDKitWidget
-            app_id="app_BPZsRJANxct2cZxVRyh80SFG" // obtain this from developer.worldcoin.org
+            app_id="app_staging_5aab1ea1961f7ff5b8730d4cf509e0ab" // obtain this from developer.worldcoin.org
             action={action}
-            enableTelemetry
             onSuccess={result => console.log(result)} // pass the proof to the API or your smart contract
           />
           <div className={styles.textContainer}>

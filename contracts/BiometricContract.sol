@@ -1,18 +1,17 @@
-  /**
-   * @title ContractName
+/**
+ * @title ContractName
    * @dev ContractDescription
    * @custom:dev-run-script file_path
    */
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.0;
 
 contract BiometricContract {
     struct BiometricData {
         address sender;
         bytes32[4] encryptedData;
         bytes32 encryptedComment;
-        uint256 unlockTime;
         // mapping(address => bool) authorizedReceivers;
-        address[] authorizedReceivers;
+        address authorizedReceiver;
         // mapping(address => bytes32) comments;
         bytes32[] comments;
     }
@@ -39,58 +38,54 @@ contract BiometricContract {
     //     return encryptedData;
     // }
 
-    function sendBiometricData(bytes32[4] memory encryptedData, bytes32 encryptedComment, address[] memory receivers, uint256 unlockTime) public {
-        require(receivers.length > 0, "At least one receiver required");
+    function sendBiometricData(bytes32[4] memory encryptedData, bytes32 encryptedComment, address receiver) public {
+        // require(receivers.length > 0, "At least one receiver required");
+        // address receiver = receivers[i];
+        // require(receiver != address(0), "Invalid receiver address");
+        // require(biometricRecords[receiver].encryptedData[0] == bytes32(0), "Data already exists for receiver");
+        // require(verifiedDoctors[receiver], "Receiver is not a verified doctor");
 
-        for (uint256 i = 0; i < receivers.length; i++) {
-            address receiver = receivers[i];
-            require(receiver != address(0), "Invalid receiver address");
-            require(biometricRecords[receiver].encryptedData[0] == bytes32(0), "Data already exists for receiver");
-            require(verifiedDoctors[receiver], "Receiver is not a verified doctor");
+        // address[] memory emptyArr;
+        bytes32[] memory emptyArr_;
 
-            address[] memory emptyArr;
-            bytes32[] memory emptyArr_;
 
- 
-            biometricRecords[receiver] = BiometricData({
-                sender: msg.sender,
-                encryptedData: encryptedData,
-                encryptedComment: encryptedComment,
-                unlockTime: unlockTime,
-                authorizedReceivers:emptyArr,
-                comments:emptyArr_
-            });
+        biometricRecords[receiver] = BiometricData({
+            sender: msg.sender,
+            encryptedData: encryptedData,
+            encryptedComment: encryptedComment,
+            authorizedReceiver:receiver,
+            comments:emptyArr_
+        });
 
-            // 수신자를 열람 권한 목록에 추가
-            // biometricRecords[receiver].authorizedReceivers[receiver] = true;
-            biometricRecords[receiver].authorizedReceivers.push(receiver);
+        // 수신자를 열람 권한 목록에 추가
+        // biometricRecords[receiver].authorizedReceivers[receiver] = true;
+        // biometricRecords[receiver].authorizedReceivers.push(receiver);
 
-            emit BiometricDataUpdated(receiver, encryptedData);
-        }
+        emit BiometricDataUpdated(receiver, encryptedData);
+
     }
 
     function checkAuth(address _account ,BiometricData memory _biometricData) public view returns (bool){
-        for(uint i=0; i < _biometricData.authorizedReceivers.length;i++){
-            if(_biometricData.authorizedReceivers[i] == _account){
-                return true;
-            }
+        if (_biometricData.authorizedReceiver == _account){
+            return true;
         }
-        return false;
-    } 
+        else{
+            return false;
+        }
+    }
 
     // function getComment(address _account, BiometricData memory _biometricData) public view returns (bytes32[]){
     //     bytes32[] comments;
     //     for (uint i=0; i<_biometricData.comments.length;i++){
     //         // 자신이 작성한 코멘트인지 확인 후 comments 배열에 push
-            
+
     //     }
 
     //     return comments;
     // }
 
-    function getBiometricData(address _account) public view returns (bytes32[4] memory, bytes32, uint256) {
+    function getBiometricData(address _account) public view returns (bytes32[4] memory, bytes32) {
         BiometricData storage data = biometricRecords[_account];
-        require(data.unlockTime >= block.timestamp, "Data locked");
         require(checkAuth(msg.sender,data), "Access denied");
         // // 데이터 복호화 로직을 추가합니다.
         // bytes32[4] memory decryptedData;
@@ -100,19 +95,18 @@ contract BiometricContract {
         //     decryptedData[i] = decryptWithPrivateKey(data.encryptedData[i]);
         // }
 
-        return (data.encryptedData, data.encryptedComment, data.unlockTime);
+        return (data.encryptedData, data.encryptedComment);
     }
 
-    function getComment() public view returns (bytes32[] memory ) {
+    function getComment() public view returns (bytes32 ) {
         BiometricData storage data = biometricRecords[msg.sender];
         require(data.sender == msg.sender, "Access denied");
-        return data.comments;
+        return data.encryptedComment;
     }
 
     function addComment(address receiverAccount,bytes32 comment) public {
         BiometricData storage data = biometricRecords[receiverAccount];
         require(checkAuth(msg.sender,data),"Biometric access not allowed");
-        require(data.unlockTime >= block.timestamp, "Data locked");
         data.comments.push(comment);
     }
 

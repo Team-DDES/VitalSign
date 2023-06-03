@@ -9,7 +9,6 @@
     "lint:eslint": "eslint . --ext .ts,.tsx",
     "lint:staged": "lint-staged"
   },
-
   "lint-staged": {
     "*.{js,jsx}": [
       "npm run lint:eslint"
@@ -29,11 +28,13 @@
     "react-dom": "^18.2.0",
     "react-webcam": "^7.1.0",
     "sass": "1.26.10",
+    "styled-components": "^5.3.11",
     "truffle": "^5.9.3"
   },
   "devDependencies": {
     "@types/chart.js": "^2.9.28",
     "@types/react": "^16.9.53",
+    "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "eslint": "7.12.0",
@@ -46,10 +47,10 @@
     "eslint-plugin-react": "7.21.5",
     "eslint-plugin-react-hooks": "4.2.0",
     "lint-staged": "^13.2.2",
+    "mathjs": "^11.8.0",
     "pre-commit": "1.2.2",
     "prettier": "^1.17.0",
     "typescript": "^4.0.3",
-    "mathjs": "^11.8.0",
     "web3": "^1.10.0"
   }
 }

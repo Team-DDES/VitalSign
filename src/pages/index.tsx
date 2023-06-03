@@ -271,7 +271,6 @@ const Home = () => {
       </Head>
       <Header />
       <div className={styles.homeContainer}>
-        <Contributor />
         <div className={styles.contentContainer}>
           <h3>
             This is a demo for camera-based remote PPG (Pulse) sensing. The
@@ -367,7 +366,6 @@ const Home = () => {
               }}
             />
           )}
-          <Research />
           <a href="http://cs.washington.edu/" target="_blank">
             <img src="/images/UWlogo5.png" alt="" width={500} height={70} />
           </a>

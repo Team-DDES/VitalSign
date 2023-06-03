@@ -15,8 +15,6 @@ import Fili from 'fili';
 import { fft, pow, sqrt } from 'mathjs';
 import { CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit';
 import Header from '../components/header';
-import Research from '../components/research';
-import Contributor from '../components/contributor';
 import styles from '../styles/Home.module.scss';
 import tensorStore from '../lib/tensorStore';
 import Preprocessor from '../lib/preprocessor';

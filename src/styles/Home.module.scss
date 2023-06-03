@@ -11,6 +11,19 @@
        outline: none;
     }
 }
+.recordingButton:hover {
+    display: block;
+    padding: 20px;
+    color: black;
+    font-size: 15px;
+    background-color: #B4D17C;
+    border: 0.5px solid white;
+    border-radius: 20px;
+    margin: 8px;
+    &:focus {
+       outline: none;
+    }
+}
 
 .contentContainer {
     display: flex;
@@ -25,10 +38,10 @@
 .webcam {
     position: relative;
     &::before {
-        z-index: 1000;
+        z-index: 10;
         content: " ";
         position: absolute;
-        top: 100px;
+        top: 110px;
         left: 150px;
         right: 150px;
         bottom: 200px;

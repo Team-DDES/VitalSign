@@ -11,13 +11,12 @@ const Header = () => (
           height="32"
         />
       </a>
-      <a 
-        className={styles.github}
-        href="https://github.com/ubicomplab/rppg-web" target="_blank">
-          GITHUB
-      </a>
+      <br></br>
+      <div style={{fontSize: '20px'}}>
+      THE GLOBAL ECONOMY BELONGS TO EVERYONE.
+      </div> 
     </view>
-    
+  
   </header>
 );
 

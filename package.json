@@ -9,6 +9,7 @@
     "lint:eslint": "eslint . --ext .ts,.tsx",
     "lint:staged": "lint-staged"
   },
+
   "lint-staged": {
     "*.{js,jsx}": [
       "npm run lint:eslint"

@@ -35,6 +35,7 @@ const config: ChartDataSets = {
   borderDashOffset: 0.0,
   pointRadius: 0
 };
+
 function getHeartRateFromPPG({
   ppgSignal,
   sampleRate,
@@ -47,8 +48,9 @@ function getHeartRateFromPPG({
   max: any;
 }) {
   // FFT 라이브러리를 사용하여 FFT 수행
+
   const signal = Array.from(ppgSignal); // Float32Array를 Array로 변환
-  const spectrum = fft(signal);
+  const spectrum:any= fft(signal);
   const startFrequency = min; // 심장박동 주파수 범위의 시작값
   const endFrequency = max; // 심장박동 주파수 범위의 종료값
 
@@ -56,12 +58,14 @@ function getHeartRateFromPPG({
   let maxAmplitude = -Infinity;
   let maxFrequency = 0;
 
+
   // 주파수 대역 내에서 최대값을 찾습니다.
   for (let i = 0; i < spectrum.length; i++) {
     const frequency = (i * sampleRate) / ppgSignal.length;
     if (frequency >= startFrequency && frequency <= endFrequency) {
       // const amplitude = 0;
-      // console.log(spectrum[i].re);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const amplitude = Math.sqrt(
         Math.pow(spectrum[i].im, 2) + Math.pow(spectrum[i].re, 2)
       );

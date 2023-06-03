@@ -95,6 +95,7 @@ const Home = () => {
   const intervalId = React.useRef<NodeJS.Timeout>();
   const coutdownIntervalId = React.useRef<NodeJS.Timeout>();
   const [isRecording, setRecording] = useState(false);
+  const [isStartRecording, setViewCamera] = useState(false);
   const [charData, setCharData] = useState<GraphProps>({
     labels: [],
     rppg: []
@@ -210,6 +211,7 @@ const Home = () => {
       }
     }, 1000);
     setRecording(true);
+    setViewCamera(true);
     preprocessor.startProcess();
   };
 
@@ -319,14 +321,6 @@ const Home = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
   });
-
-  const handledocterAddr = (e)=>{
-    setDocterAddr(e.target.value);
-
-  }
-  useEffect(()=>{
-    console.log(docterAddr);
-  },[docterAddr])
   // const urlParams = new URLSearchParams(window.location.search);
 
   // const credential_types = (urlParams.get("credential_types")?.split(",") as CredentialType[]) ?? [
@@ -344,7 +338,7 @@ const Home = () => {
         <title>rPPG Web Demo</title>
         <link rel="icon" href="/images/icon.png" />
       </Head>
-      <Header />
+      <Header/>
       <div className={styles.homeContainer}>
         <div className={styles.contentContainer}>
           <h3>rPPG is a method to extract BVP from the face.</h3>
@@ -370,13 +364,10 @@ const Home = () => {
             >
               MetaMask
             </button>
-            <button className={styles.recordingButton}
-                    onClick={sendBiometric}
-                    type="button">
+            <button className={styles.recordingButton} type="button">
               Send Information
             </button>
           </div>
-          <input placeholder={"doctor's wallet address"} onChange={handledocterAddr}/>
           {/* <div
             className="App"
             style={{
@@ -400,27 +391,49 @@ const Home = () => {
           </div> */}
 
           <IDKitWidget
+            app_id="app_staging_49662fcbff8bf7ca043d45fc46eb065e" // obtained from the Developer Portal
+            action="vote_1" // this is your action identifier from the Developer Portal (can also be created on the fly)
+            signal="user_value" // any arbitrary value the user is committing to, e.g. for a voting app this could be the vote
+            onSuccess={onSuccess => console.log(onSuccess)}
+            credential_types={[CredentialType.Orb, CredentialType.Phone]} // the credentials you want to accept
+            //walletConnectProjectId="get_this_from_walletconnect_portal" // optional, obtain from WalletConnect Portal
+            enableTelemetry
+          >
+            {({ open }) => <button
+              className={styles.recordingButton}
+              onClick={open}>Verify Doctor
+              </button>
+            }
+          </IDKitWidget>
+
+          {/* <IDKitWidget
+            app_id="app_staging_49662fcbff8bf7ca043d45fc46eb065e" // obtain this from developer.worldcoin.org
             app_id="app_staging_5aab1ea1961f7ff5b8730d4cf509e0ab" // obtain this from developer.worldcoin.org
             action={action}
             onSuccess={result => console.log(result)} // pass the proof to the API or your smart contract
-          />
-          <div className={styles.textContainer}>
-            <p className={styles.countdown}>{countDown}</p>
-            <p className={styles.countdown}> {heartrate}BPM</p>
-            <p className={styles.countdown}>{resipration}RR</p>
-          </div>
-          <div className={styles.innerContainer}>
-            <div className={styles.webcam}>
-              <Webcam
-                width={500}
-                height={500}
-                mirrored
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-              />
+          /> */}
+          {isStartRecording && (
+            <><div className={styles.textContainer}>
+              <p className={styles.countdown}>{countDown}</p>
+              <p className={styles.countdown}> {heartrate}BPM</p>
+              <p className={styles.countdown}>{resipration}RR</p>
             </div>
-          </div>
+            <div className={styles.innerContainer}>
+              <div className={styles.webcam}>
+                <Webcam
+                  width={500}
+                  height={500}
+                  mirrored
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                />
+              </div>
+            </div>
+            /</>
+            )
+          }
+
           {!isRecording && !!charData.rppg.length && (
             <Line
               data={plotData}

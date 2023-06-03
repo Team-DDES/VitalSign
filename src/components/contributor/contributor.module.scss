@@ -1,0 +1,25 @@
+.contributor {
+    padding-left: 12px;
+    text-align: left;
+}
+
+.image {
+  float: left;
+  margin-right:10px;
+}
+
+.item{
+    width:200px;
+    text-align:center;
+    display:block;
+    border: 1px solid transparent;
+    margin-left: 10px;
+    margin-right: 10px;
+    float:left;
+    }
+
+.gallery{
+    display: flex;
+    flex-direction: column;
+    margin-right: 24px;
+}

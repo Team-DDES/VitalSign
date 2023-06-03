@@ -1,31 +1,51 @@
 {
-  "name": "tsxtest",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "rppg-web",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p 80",
+    "lint:eslint": "eslint . --ext .ts,.tsx",
+    "lint:staged": "lint-staged"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "npm run lint:eslint"
+    ]
+  },
+  "pre-commit": "lint:staged",
+  "dependencies": {
     "@tensorflow/tfjs": "^2.6.0",
-    "@types/chart.js": "^2.9.28",
-    "@types/react": "^16.9.53",
+    "@worldcoin/idkit": "^0.4.9",
     "chart.js": "^2.9.3",
     "fili": "^2.0.3",
     "lodash": "^4.17.20",
-    "next": "^9.5.5",
+    "next": "^13.4.4",
     "prop-types": "15.7.2",
-    "react": "16.13.1",
-    "react-chartjs-2": "^2.10.0",
-    "react-dom": "16.13.1",
-    "react-webcam": "5.2.0",
-    "sass": "1.26.10",
-    "typescript": "^4.0.3"
+    "react": "^18.2.0",
+    "react-chartjs-2": "^2.11.2",
+    "react-dom": "^18.2.0",
+    "react-webcam": "^7.1.0",
+    "sass": "1.26.10"
   },
-  "dependencies": {
-    "web3": "^1.10.0"
+  "devDependencies": {
+    "@types/chart.js": "^2.9.28",
+    "@types/react": "^16.9.53",
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
+    "eslint": "7.12.0",
+    "eslint-config-airbnb": "18.2.0",
+    "eslint-config-airbnb-base": "14.2.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-react": "7.21.5",
+    "eslint-plugin-react-hooks": "4.2.0",
+    "lint-staged": "^13.2.2",
+    "pre-commit": "1.2.2",
+    "prettier": "^1.17.0",
+    "typescript": "^4.0.3"
   }
 }

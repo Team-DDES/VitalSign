@@ -12,13 +12,17 @@ import {
   reshape
 } from '@tensorflow/tfjs';
 import Fili from 'fili';
-import styles from '../styles/Home.module.scss'
+import Header from '../components/header';
+import Research from '../components/research';
+import Contributor from '../components/contributor';
+import styles from '../styles/Home.module.scss';
 import tensorStore from '../lib/tensorStore';
 import Preprocessor from '../lib/preprocessor';
 import Posprocessor from '../lib/posprocessor';
 
-import Web3 from 'web3';
+import {  CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
 
+import testAbi from '../../testabi.json';
 const postprocessor = new Posprocessor(tensorStore);
 const preprocessor = new Preprocessor(tensorStore, postprocessor);
 
@@ -68,18 +72,6 @@ const Home = () => {
     },
     []
   );
-
-  const connectToMetaMask = async () =>{
-    if (typeof window.ethereum !== 'undefined') {
-      // Metamask가 설치되어 있는 경우
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const web3 = new Web3(window.ethereum);
-      // 이제 web3를 사용하여 Metamask와 상호작용할 수 있습니다.
-    } else {
-      // Metamask가 설치되어 있지 않은 경우 또는 사용자가 거부한 경우
-      console.error('Please install Metamask');
-    }
-  }
 
   const startRecording = async () => {
     await postprocessor.loadModel();
@@ -175,19 +167,47 @@ const Home = () => {
     ]
   };
 
+  const handleProof = (result: ISuccessResult) => {
+		return new Promise<void>((resolve) => {
+			setTimeout(() => resolve(), 3000);
+			// NOTE: Example of how to decline the verification request and show an error message to the user
+		});
+	};
+
+	const onSuccess = (result: ISuccessResult) => {
+		console.log(result);
+	};
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+  })
+	//const urlParams = new URLSearchParams(window.location.search);
+  
+	// const credential_types = (urlParams.get("credential_types")?.split(",") as CredentialType[]) ?? [
+	// 	CredentialType.Orb,
+	// 	CredentialType.Phone,
+	// ];
+
+	// const action = urlParams.get("action") ?? "";
+	// const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
+  const action = JSON.stringify(testAbi);
   return (
     <>
       <Head>
-        <title>Vital Sign</title>
+        <title>rPPG Web Demo</title>
         <link rel="icon" href="/images/icon.png" />
       </Head>
+      <Header />
       <div className={styles.homeContainer}>
+        <Contributor />
         <div className={styles.contentContainer}>
           <h3>
-            PPG is a method to extract BVP from the face. The pixels extracted from a face image taken with the RGB camera have face reproduction information, noise, and BVP values.
+            This is a demo for camera-based remote PPG (Pulse) sensing. The
+            recorded video will not be uploaded to cloud.
           </h3>
           <h4 style={{ color: 'red' }}>
-            Please place your face inside of the red box and keep stationary for 30 seconds
+            Please place your face inside of the red box and keep stationary for
+            30 seconds
           </h4>
           {!isRecording && (
             <button
@@ -198,14 +218,33 @@ const Home = () => {
               Start the Demo
             </button>
           )}
-          <button
-              className={styles.recordingButton}
-              onClick={connectToMetaMask}
-              type="button"
+          {/* <div
+            className="App"
+            style={{
+              minHeight: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            MetaMask
-          </button>
-
+            <IDKitWidget
+              action={action}
+              signal="my_signal"
+              onSuccess={onSuccess}
+              handleVerify={handleProof}
+              app_id={app_id}
+              credential_types={credential_types}
+              // walletConnectProjectId="get_this_from_walletconnect_portal"
+            >
+              {({ open }) => <button onClick={open}>Click me</button>}
+            </IDKitWidget>
+          </div> */}
+          <IDKitWidget
+            app_id="app_BPZsRJANxct2cZxVRyh80SFG" // obtain this from developer.worldcoin.org
+            action={action}
+            enableTelemetry
+            onSuccess={result => console.log(result)} // pass the proof to the API or your smart contract
+          />
           <p className={styles.countdown}>{countDown}</p>
           <div className={styles.innerContainer}>
             <div className={styles.webcam}>
@@ -248,6 +287,10 @@ const Home = () => {
               }}
             />
           )}
+          <Research />
+          <a href="http://cs.washington.edu/" target="_blank">
+            <img src="/images/UWlogo5.png" alt="" width={500} height={70} />
+          </a>
         </div>
       </div>
     </>

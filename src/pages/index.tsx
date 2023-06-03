@@ -1,31 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Line } from 'react-chartjs-2';
+import React, {useEffect, useState} from 'react';
+import {Line} from 'react-chartjs-2';
 import Head from 'next/head';
 import Webcam from 'react-webcam';
-import { ChartDataSets } from 'chart.js';
-import {
-  image,
-  browser,
-  tidy,
-  dispose,
-  cumsum,
-  reshape, addStrict
-} from '@tensorflow/tfjs';
+import {ChartDataSets} from 'chart.js';
+import {browser, cumsum, dispose, image, reshape, tidy} from '@tensorflow/tfjs';
 import Fili from 'fili';
-import { fft, pow, sqrt } from 'mathjs';
-import {CredentialType, IDKitWidget, ISuccessResult, useIDKit} from '@worldcoin/idkit';
+import {fft} from 'mathjs';
+import {IDKitWidget, ISuccessResult, useIDKit} from '@worldcoin/idkit';
 import Web3 from 'web3';
-import { AbiItem } from 'web3-utils';
-import { Contract } from 'web3-eth-contract';
+import {AbiItem} from 'web3-utils';
+import {Contract} from 'web3-eth-contract';
 import Header from '../components/header';
 import styles from '../styles/Home.module.scss';
 import tensorStore from '../lib/tensorStore';
 import Preprocessor from '../lib/preprocessor';
 import Posprocessor from '../lib/posprocessor';
-
-import testAbi from '../../testabi.json';
 // import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../contracts/config';
 import contractInfo from '../contracts/BiometricContract.json';
+
 const postprocessor = new Posprocessor(tensorStore);
 const preprocessor = new Preprocessor(tensorStore, postprocessor);
 
@@ -163,24 +155,24 @@ const Home = () => {
   }, [w3, account, contract]);
 
 
-  const sendBiometric = async () =>{
+  const sendBiometric = async () => {
     // console.log(contract)
-    if ( heartrate == 0 && resipration == 0 ){
+    if (heartrate == 0 && resipration == 0) {
       return;
     }
     let bioArray = [];
-    const hr = w3?.utils.stringToHex(w3?.utils.rightPad(heartrate.toString(),32));
-    const rr = w3?.utils.stringToHex(w3?.utils.rightPad(resipration.toString(),32));
-    const stress= w3?.utils.stringToHex(w3?.utils.rightPad("High",32));
-    const sp = w3?.utils.stringToHex(w3?.utils.rightPad("98",32));
-    const comment = w3?.utils.stringToHex(w3?.utils.rightPad("normal",32));
+    const hr = w3?.utils.stringToHex(w3?.utils.rightPad(heartrate.toString(), 32));
+    const rr = w3?.utils.stringToHex(w3?.utils.rightPad(resipration.toString(), 32));
+    const stress = w3?.utils.stringToHex(w3?.utils.rightPad("High", 32));
+    const sp = w3?.utils.stringToHex(w3?.utils.rightPad("98", 32));
+    const comment = w3?.utils.stringToHex(w3?.utils.rightPad("normal", 32));
     bioArray.push(hr)
     bioArray.push(rr)
     bioArray.push(stress)
     bioArray.push(sp)
     console.log(comment)
     // @ts-ignore
-    await contract.methods.sendBiometricData(bioArray,comment,docterAddr).send( {
+    await contract.methods.sendBiometricData(bioArray, comment, docterAddr).send({
       "from": account,
     });
   }
@@ -330,19 +322,19 @@ const Home = () => {
 
   // const action = urlParams.get("action") ?? "";
   // const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
-  const action ="";// JSON.stringify(testAbi);
+  const action = "";// JSON.stringify(testAbi);
 
   return (
     <>
       <Head>
         <title>rPPG Web Demo</title>
-        <link rel="icon" href="/images/icon.png" />
+        <link rel="icon" href="/images/icon.png"/>
       </Head>
       <Header/>
       <div className={styles.homeContainer}>
         <div className={styles.contentContainer}>
           <h3>rPPG is a method to extract BVP from the face.</h3>
-          <h4 style={{ color: 'red' }}>
+          <h4 style={{color: 'red'}}>
             Please place your face inside of the red box and keep stationary for
             5 seconds
           </h4>
@@ -364,74 +356,37 @@ const Home = () => {
             >
               MetaMask
             </button>
-            <button className={styles.recordingButton} type="button">
+            <button className={styles.recordingButton} type="button" onClick={sendBiometric}>
               Send Information
             </button>
           </div>
-          {/* <div
-            className="App"
-            style={{
-              minHeight: "100vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <IDKitWidget
-              action={action}
-              signal="my_signal"
-              onSuccess={onSuccess}
-              handleVerify={handleProof}
-              app_id={app_id}
-              credential_types={credential_types}
-              // walletConnectProjectId="get_this_from_walletconnect_portal"
-            >
-              {({ open }) => <button onClick={open}>Click me</button>}
-            </IDKitWidget>
-          </div> */}
 
           <IDKitWidget
-            app_id="app_staging_49662fcbff8bf7ca043d45fc46eb065e" // obtained from the Developer Portal
-            action="vote_1" // this is your action identifier from the Developer Portal (can also be created on the fly)
-            signal="user_value" // any arbitrary value the user is committing to, e.g. for a voting app this could be the vote
-            onSuccess={onSuccess => console.log(onSuccess)}
-            credential_types={[CredentialType.Orb, CredentialType.Phone]} // the credentials you want to accept
-            //walletConnectProjectId="get_this_from_walletconnect_portal" // optional, obtain from WalletConnect Portal
-            enableTelemetry
-          >
-            {({ open }) => <button
-              className={styles.recordingButton}
-              onClick={open}>Verify Doctor
-              </button>
-            }
-          </IDKitWidget>
-
-          {/* <IDKitWidget
-            app_id="app_staging_49662fcbff8bf7ca043d45fc46eb065e" // obtain this from developer.worldcoin.org
-            app_id="app_staging_5aab1ea1961f7ff5b8730d4cf509e0ab" // obtain this from developer.worldcoin.org
+            app_id="app_staging_a414e2af064c52df63f1e1f8842b613e" // obtain this from developer.worldcoin.org
             action={action}
             onSuccess={result => console.log(result)} // pass the proof to the API or your smart contract
-          /> */}
+          />
           {isStartRecording && (
-            <><div className={styles.textContainer}>
-              <p className={styles.countdown}>{countDown}</p>
-              <p className={styles.countdown}> {heartrate}BPM</p>
-              <p className={styles.countdown}>{resipration}RR</p>
-            </div>
-            <div className={styles.innerContainer}>
-              <div className={styles.webcam}>
-                <Webcam
-                  width={500}
-                  height={500}
-                  mirrored
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                />
+            <>
+              <div className={styles.textContainer}>
+                <p className={styles.countdown}>{countDown}</p>
+                <p className={styles.countdown}> {heartrate}BPM</p>
+                <p className={styles.countdown}>{resipration}RR</p>
               </div>
-            </div>
-            /</>
-            )
+              <div className={styles.innerContainer}>
+                <div className={styles.webcam}>
+                  <Webcam
+                    width={500}
+                    height={500}
+                    mirrored
+                    audio={false}
+                    ref={webcamRef}
+                    screenshotFormat="image/jpeg"
+                  />
+                </div>
+              </div>
+              /</>
+          )
           }
 
           {!isRecording && !!charData.rppg.length && (

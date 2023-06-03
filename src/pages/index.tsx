@@ -4,13 +4,16 @@ import Head from 'next/head';
 import Webcam from 'react-webcam';
 import {ChartDataSets} from 'chart.js';
 import {browser, cumsum, dispose, image, reshape, tidy} from '@tensorflow/tfjs';
+import TextField from '@material-ui/core/TextField';
+
 import Fili from 'fili';
 import {fft} from 'mathjs';
-import {IDKitWidget, ISuccessResult, useIDKit} from '@worldcoin/idkit';
+import {CredentialType, IDKitWidget, ISuccessResult, useIDKit} from '@worldcoin/idkit';
 import Web3 from 'web3';
 import {AbiItem} from 'web3-utils';
 import {Contract} from 'web3-eth-contract';
 import Header from '../components/header';
+import PatientInfo from '../components/home/grid';
 import styles from '../styles/Home.module.scss';
 import tensorStore from '../lib/tensorStore';
 import Preprocessor from '../lib/preprocessor';
@@ -102,6 +105,9 @@ const Home = () => {
   const [docterAddr, setDocterAddr] = useState<string>("");
   const [comment, setComment] = useState<string>("");
 
+  const [isDoctor, setDoctor] = useState(false);
+
+
   useEffect(
     () => () => {
       setOpen(true);
@@ -153,8 +159,6 @@ const Home = () => {
   useEffect(() => {
     console.log(w3, account, contract);
   }, [w3, account, contract]);
-
-
   const sendBiometric = async () => {
     // console.log(contract)
     if (heartrate == 0 && resipration == 0) {
@@ -306,6 +310,8 @@ const Home = () => {
       // NOTE: Example of how to decline the verification request and show an error message to the user
     });
 
+  
+
   const onSuccess = (result: ISuccessResult) => {
     console.log(result);
   };
@@ -322,7 +328,21 @@ const Home = () => {
 
   // const action = urlParams.get("action") ?? "";
   // const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
-  const action = "";// JSON.stringify(testAbi);
+  const action = "";
+  //0x305fd754ee2e9fbb7bbf0a58bfc9b3f9e01ea3a4d8f68e55c8dce738f52f41cb
+
+  const [text, setText] = useState("");
+
+  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setText(event.target.value);
+  // };
+
+  const patientData = new Map();
+  patientData.set('heartRate', 80);
+  patientData.set('respirationRate', 20);
+  patientData.set('stressLevel', 5);
+  patientData.set('spO2', 98);
+  patientData.set('comment', "Carefully");
 
   return (
     <>
@@ -333,33 +353,56 @@ const Home = () => {
       <Header/>
       <div className={styles.homeContainer}>
         <div className={styles.contentContainer}>
+          <h3>Hello, User</h3>
           <h3>rPPG is a method to extract BVP from the face.</h3>
           <h4 style={{color: 'red'}}>
             Please place your face inside of the red box and keep stationary for
             5 seconds
           </h4>
           <p className={styles.countdown}>comment:{comment}</p>
-          <div className={styles.buttonContainer}>
+          <PatientInfo />
+          <div className={styles.buttonContainer} style={{marginTop: '20px'}}>
             {!isRecording && (
               <button
                 className={styles.recordingButton}
+                style={{width: '800px'}}
                 onClick={startRecording}
                 type="button"
               >
                 Start Monitoring
               </button>
             )}
-            <button
+            {/* <button // Metamask debug Button
               className={styles.recordingButton}
               onClick={connectToMetaMask}
               type="button"
             >
               MetaMask
-            </button>
-            <button className={styles.recordingButton} type="button" onClick={sendBiometric}>
-              Send Information
-            </button>
+            </button> */}
           </div>
+          <div className={styles.buttonContainer} >
+            <button className={styles.recordingButton} style={{width: '800px'}} type="button" >
+                Send Information
+              </button>
+          </div>
+          <IDKitWidget
+            app_id="app_staging_49662fcbff8bf7ca043d45fc46eb065e" // obtained from the Developer Portal
+            action="vote_1" // this is your action identifier from the Developer Portal (can also be created on the fly)
+            signal="user_value" // any arbitrary value the user is committing to, e.g. for a voting app this could be the vote
+            onSuccess={onSuccess => {
+              setDoctor(true);
+            }}
+            credential_types={[CredentialType.Orb, CredentialType.Phone]} // the credentials you want to accept
+            //walletConnectProjectId="get_this_from_walletconnect_portal" // optional, obtain from WalletConnect Portal
+            enableTelemetry
+          >
+            {({ open }) => <button 
+              className={styles.recordingButton}
+              style={{width: '800px'}}
+              onClick={open}>Verify Doctor
+              </button>
+            }
+          </IDKitWidget>
 
           <IDKitWidget
             app_id="app_staging_a414e2af064c52df63f1e1f8842b613e" // obtain this from developer.worldcoin.org
@@ -388,7 +431,6 @@ const Home = () => {
               /</>
           )
           }
-
           {!isRecording && !!charData.rppg.length && (
             <Line
               data={plotData}
@@ -418,6 +460,17 @@ const Home = () => {
               }}
             />
           )}
+        { //Doctor View
+          isDoctor && (
+            <div>
+            <TextField
+              label="Comment : "
+              value={text}
+            />
+            <p>Your text: {text}</p>
+            </div>
+          )
+        }
         </div>
       </div>
     </>

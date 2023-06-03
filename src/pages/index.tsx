@@ -12,6 +12,8 @@ import {
   reshape
 } from '@tensorflow/tfjs';
 import Fili from 'fili';
+import { fft, pow, sqrt } from 'mathjs';
+import { CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit';
 import Header from '../components/header';
 import Research from '../components/research';
 import Contributor from '../components/contributor';
@@ -20,11 +22,11 @@ import tensorStore from '../lib/tensorStore';
 import Preprocessor from '../lib/preprocessor';
 import Posprocessor from '../lib/posprocessor';
 
-import {  CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
-
 import testAbi from '../../testabi.json';
 const postprocessor = new Posprocessor(tensorStore);
 const preprocessor = new Preprocessor(tensorStore, postprocessor);
+
+const time = 5;
 
 const config: ChartDataSets = {
   fill: false,
@@ -33,6 +35,48 @@ const config: ChartDataSets = {
   borderDashOffset: 0.0,
   pointRadius: 0
 };
+function getHeartRateFromPPG({
+  ppgSignal,
+  sampleRate,
+  min,
+  max
+}: {
+  ppgSignal: Float32Array | Int32Array | Uint8Array;
+  sampleRate: any;
+  min: any;
+  max: any;
+}) {
+  // FFT 라이브러리를 사용하여 FFT 수행
+  const signal = Array.from(ppgSignal); // Float32Array를 Array로 변환
+  const spectrum = fft(signal);
+  const startFrequency = min; // 심장박동 주파수 범위의 시작값
+  const endFrequency = max; // 심장박동 주파수 범위의 종료값
+
+  // 주파수 대역에서 최대값을 찾습니다.
+  let maxAmplitude = -Infinity;
+  let maxFrequency = 0;
+
+  // 주파수 대역 내에서 최대값을 찾습니다.
+  for (let i = 0; i < spectrum.length; i++) {
+    const frequency = (i * sampleRate) / ppgSignal.length;
+    if (frequency >= startFrequency && frequency <= endFrequency) {
+      // const amplitude = 0;
+      // console.log(spectrum[i].re);
+      const amplitude = Math.sqrt(
+        Math.pow(spectrum[i].im, 2) + Math.pow(spectrum[i].re, 2)
+      );
+      if (amplitude > maxAmplitude) {
+        maxAmplitude = amplitude;
+        maxFrequency = frequency;
+      }
+    }
+  }
+
+  // 주파수를 심장박동 수로 변환합니다.
+  const heartRate = maxFrequency * 60;
+
+  return heartRate;
+}
 
 type GraphProps = {
   labels: string[];
@@ -48,8 +92,8 @@ const Home = () => {
     labels: [],
     rppg: []
   });
-  const refCountDown = React.useRef(30);
-  const [countDown, setCountDown] = useState(30);
+  const refCountDown = React.useRef(time);
+  const [countDown, setCountDown] = useState(time);
 
   useEffect(
     () => () => {
@@ -97,8 +141,8 @@ const Home = () => {
     }
     preprocessor.stopProcess();
     tensorStore.reset();
-    setCountDown(30);
-    refCountDown.current = 30;
+    setCountDown(time);
+    refCountDown.current = time;
     setRecording(false);
   };
 
@@ -142,6 +186,20 @@ const Home = () => {
     const iirFilter = new Fili.IirFilter(iirFilterCoeffs);
     if (pltData) {
       const rppgCumsum = cumsum(reshape(pltData, [-1, 1]), 0).dataSync();
+      const hr = getHeartRateFromPPG({
+        ppgSignal: rppgCumsum,
+        sampleRate: 30,
+        min: 1,
+        max: 3.5
+      });
+      const rr = getHeartRateFromPPG({
+        ppgSignal: rppgCumsum,
+        sampleRate: 30,
+        min: 0.07,
+        max: 0.3
+      });
+      console.log(hr);
+      console.log(rr);
       const result = iirFilter
         .filtfilt(rppgCumsum)
         .slice(0, rppgCumsum.length - 60);
@@ -167,29 +225,28 @@ const Home = () => {
     ]
   };
 
-  const handleProof = (result: ISuccessResult) => {
-		return new Promise<void>((resolve) => {
-			setTimeout(() => resolve(), 3000);
-			// NOTE: Example of how to decline the verification request and show an error message to the user
-		});
-	};
+  const handleProof = (result: ISuccessResult) =>
+    new Promise<void>(resolve => {
+      setTimeout(() => resolve(), 3000);
+      // NOTE: Example of how to decline the verification request and show an error message to the user
+    });
 
-	const onSuccess = (result: ISuccessResult) => {
-		console.log(result);
-	};
+  const onSuccess = (result: ISuccessResult) => {
+    console.log(result);
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-  })
-	//const urlParams = new URLSearchParams(window.location.search);
-  
-	// const credential_types = (urlParams.get("credential_types")?.split(",") as CredentialType[]) ?? [
-	// 	CredentialType.Orb,
-	// 	CredentialType.Phone,
-	// ];
+  });
+  // const urlParams = new URLSearchParams(window.location.search);
 
-	// const action = urlParams.get("action") ?? "";
-	// const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
+  // const credential_types = (urlParams.get("credential_types")?.split(",") as CredentialType[]) ?? [
+  // 	CredentialType.Orb,
+  // 	CredentialType.Phone,
+  // ];
+
+  // const action = urlParams.get("action") ?? "";
+  // const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
   const action = JSON.stringify(testAbi);
   return (
     <>

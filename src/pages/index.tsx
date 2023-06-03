@@ -23,6 +23,7 @@ import Preprocessor from '../lib/preprocessor';
 import Posprocessor from '../lib/posprocessor';
 
 import testAbi from '../../testabi.json';
+import Web3 from "web3";
 const postprocessor = new Posprocessor(tensorStore);
 const preprocessor = new Preprocessor(tensorStore, postprocessor);
 
@@ -120,6 +121,18 @@ const Home = () => {
     },
     []
   );
+
+  const connectToMetaMask = async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      // Metamask가 설치되어 있는 경우
+      await window.ethereum.request({method: 'eth_requestAccounts'});
+      const web3 = new Web3(window.ethereum);
+      // 이제 web3를 사용하여 Metamask와 상호작용할 수 있습니다.
+    } else {
+      // Metamask가 설치되어 있지 않은 경우 또는 사용자가 거부한 경우
+      console.error('Please install Metamask');
+    }
+  }
 
   const startRecording = async () => {
     await postprocessor.loadModel();
@@ -270,6 +283,7 @@ const Home = () => {
             Please place your face inside of the red box and keep stationary for
             30 seconds
           </h4>
+
           {!isRecording && (
             <button
               className={styles.recordingButton}
@@ -279,6 +293,13 @@ const Home = () => {
               Start the Demo
             </button>
           )}
+          <button
+              className={styles.recordingButton}
+              onClick={connectToMetaMask}
+              type="button"
+          >
+            MetaMask
+          </button>
           {/* <div
             className="App"
             style={{

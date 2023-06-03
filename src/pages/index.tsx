@@ -97,6 +97,8 @@ const Home = () => {
   });
   const refCountDown = React.useRef(time);
   const [countDown, setCountDown] = useState(time);
+  const [heartrate, setheartrate] = useState(0);
+  const [resipration, setresipration] = useState(0);
 
   useEffect(
     () => () => {
@@ -213,8 +215,8 @@ const Home = () => {
         min: 0.07,
         max: 0.3
       });
-      console.log(hr);
-      console.log(rr);
+      setheartrate(hr);
+      setresipration(rr);
       const result = iirFilter
         .filtfilt(rppgCumsum)
         .slice(0, rppgCumsum.length - 60);
@@ -274,21 +276,20 @@ const Home = () => {
       <div className={styles.homeContainer}>
         <div className={styles.contentContainer}>
           <h3>
-            This is a demo for camera-based remote PPG (Pulse) sensing. The
-            recorded video will not be uploaded to cloud.
+            rPPG is a method to extract BVP from the face.
           </h3>
           <h4 style={{ color: 'red' }}>
             Please place your face inside of the red box and keep stationary for
             5 seconds
           </h4>
-
+          <div className={styles.buttonContainer}>
           {!isRecording && (
             <button
               className={styles.recordingButton}
               onClick={startRecording}
               type="button"
             >
-              Start the Demo
+              Start Monitoring
             </button>
           )}
           <button
@@ -298,6 +299,13 @@ const Home = () => {
           >
             MetaMask
           </button>
+            <button
+              className={styles.recordingButton}
+              type="button"
+            >
+              Send Information
+            </button>
+          </div>
           {/* <div
             className="App"
             style={{
@@ -325,7 +333,11 @@ const Home = () => {
             enableTelemetry
             onSuccess={result => console.log(result)} // pass the proof to the API or your smart contract
           />
-          <p className={styles.countdown}>{countDown}</p>
+          <div className={styles.textContainer}>
+            <p className={styles.countdown}>{countDown}</p>
+            <p className={styles.countdown}> {heartrate}BPM</p>
+            <p className={styles.countdown}>{resipration}RR</p>
+          </div>
           <div className={styles.innerContainer}>
             <div className={styles.webcam}>
               <Webcam
@@ -341,8 +353,8 @@ const Home = () => {
           {!isRecording && !!charData.rppg.length && (
             <Line
               data={plotData}
-              width={1200}
-              height={300}
+              width={400}
+              height={100}
               options={{
                 responsive: false,
                 animation: {

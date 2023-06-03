@@ -5,17 +5,6 @@ import Web3 from "web3";
 
 function MyApp({ Component, pageProps }: any) {
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
-
-  const SplashScreen = () => {
-    return (
-      <SplashContainer>
-        <SplashProgressBar>
-          <ProgressBar />
-        </SplashProgressBar>
-      </SplashContainer>
-    );
-  };
-
   
   useEffect(() => {
     const initMetamask = async () => {
@@ -36,7 +25,7 @@ function MyApp({ Component, pageProps }: any) {
   if (isMetamaskConnected) {
     return <Component {...pageProps} />;
   } else {
-    return ;//SplashScreen;
+    return ;
   }
 }
 

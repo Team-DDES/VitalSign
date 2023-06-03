@@ -31,6 +31,7 @@
     align-items: center;
 }
 
+
 .innerContainer {
     justify-content: center;
 }
@@ -57,4 +58,20 @@
     display: flex;
     justify-content: center;
     margin-top: 24px;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.textContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.textContainer p {
+    margin-right: 10px;
 }

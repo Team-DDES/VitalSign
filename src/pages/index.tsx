@@ -263,6 +263,7 @@ const Home = () => {
   // const action = urlParams.get("action") ?? "";
   // const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
   const action = JSON.stringify(testAbi);
+
   return (
     <>
       <Head>
@@ -278,7 +279,7 @@ const Home = () => {
           </h3>
           <h4 style={{ color: 'red' }}>
             Please place your face inside of the red box and keep stationary for
-            30 seconds
+            5 seconds
           </h4>
 
           {!isRecording && (
@@ -366,9 +367,6 @@ const Home = () => {
               }}
             />
           )}
-          <a href="http://cs.washington.edu/" target="_blank">
-            <img src="/images/UWlogo5.png" alt="" width={500} height={70} />
-          </a>
         </div>
       </div>
     </>

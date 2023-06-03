@@ -17,6 +17,7 @@ import { CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 import { Contract } from 'web3-eth-contract';
+import { WorldIDWidget } from '@worldcoin/id'
 import Header from '../components/header';
 import styles from '../styles/Home.module.scss';
 import tensorStore from '../lib/tensorStore';
@@ -94,6 +95,7 @@ const Home = () => {
   const intervalId = React.useRef<NodeJS.Timeout>();
   const coutdownIntervalId = React.useRef<NodeJS.Timeout>();
   const [isRecording, setRecording] = useState(false);
+  const [isStartRecording, setViewCamera] = useState(false);
   const [charData, setCharData] = useState<GraphProps>({
     labels: [],
     rppg: []
@@ -181,6 +183,7 @@ const Home = () => {
       }
     }, 1000);
     setRecording(true);
+    setViewCamera(true);
     preprocessor.startProcess();
   };
 
@@ -300,14 +303,14 @@ const Home = () => {
   // const action = urlParams.get("action") ?? "";
   // const app_id = urlParams.get("app_id") ?? "app_BPZsRJANxct2cZxVRyh80SFG";
   const action = JSON.stringify(testAbi);
-
+  //0x305fd754ee2e9fbb7bbf0a58bfc9b3f9e01ea3a4d8f68e55c8dce738f52f41cb
   return (
     <>
       <Head>
         <title>rPPG Web Demo</title>
         <link rel="icon" href="/images/icon.png" />
       </Head>
-      <Header />
+      <Header/>
       <div className={styles.homeContainer}>
         <div className={styles.contentContainer}>
           <h3>rPPG is a method to extract BVP from the face.</h3>
@@ -358,28 +361,49 @@ const Home = () => {
             </IDKitWidget>
           </div> */}
           <IDKitWidget
-            app_id="app_BPZsRJANxct2cZxVRyh80SFG" // obtain this from developer.worldcoin.org
+            app_id="app_staging_49662fcbff8bf7ca043d45fc46eb065e" // obtained from the Developer Portal
+            action="vote_1" // this is your action identifier from the Developer Portal (can also be created on the fly)
+            signal="user_value" // any arbitrary value the user is committing to, e.g. for a voting app this could be the vote
+            onSuccess={onSuccess => console.log(onSuccess)}
+            credential_types={[CredentialType.Orb, CredentialType.Phone]} // the credentials you want to accept
+            //walletConnectProjectId="get_this_from_walletconnect_portal" // optional, obtain from WalletConnect Portal
+            enableTelemetry
+          >
+            {({ open }) => <button 
+              className={styles.recordingButton}
+              onClick={open}>Verify Doctor
+              </button>
+            }
+          </IDKitWidget>
+
+          {/* <IDKitWidget
+            app_id="app_staging_49662fcbff8bf7ca043d45fc46eb065e" // obtain this from developer.worldcoin.org
             action={action}
             enableTelemetry
             onSuccess={result => console.log(result)} // pass the proof to the API or your smart contract
-          />
-          <div className={styles.textContainer}>
-            <p className={styles.countdown}>{countDown}</p>
-            <p className={styles.countdown}> {heartrate}BPM</p>
-            <p className={styles.countdown}>{resipration}RR</p>
-          </div>
-          <div className={styles.innerContainer}>
-            <div className={styles.webcam}>
-              <Webcam
-                width={500}
-                height={500}
-                mirrored
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-              />
+          /> */}
+          {isStartRecording && (
+            <><div className={styles.textContainer}>
+              <p className={styles.countdown}>{countDown}</p>
+              <p className={styles.countdown}> {heartrate}BPM</p>
+              <p className={styles.countdown}>{resipration}RR</p>
             </div>
-          </div>
+            <div className={styles.innerContainer}>
+              <div className={styles.webcam}>
+                <Webcam
+                  width={500}
+                  height={500}
+                  mirrored
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                />
+              </div>
+            </div>
+            /</>
+            )
+          }
+
           {!isRecording && !!charData.rppg.length && (
             <Line
               data={plotData}

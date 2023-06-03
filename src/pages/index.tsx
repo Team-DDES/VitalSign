@@ -345,7 +345,7 @@ const Home = () => {
   patientData.set('comment', "Carefully");
 
   return (
-    <>
+    <div style={{overflow: 'auto'}}>
       <Head>
         <title>rPPG Web Demo</title>
         <link rel="icon" href="/images/icon.png"/>
@@ -428,7 +428,7 @@ const Home = () => {
                   />
                 </div>
               </div>
-              /</>
+              </>
           )
           }
           {!isRecording && !!charData.rppg.length && (
@@ -463,17 +463,23 @@ const Home = () => {
         { //Doctor View
           isDoctor && (
             <div>
-            <TextField
-              label="Comment : "
-              value={text}
-            />
-            <p>Your text: {text}</p>
+              <TextField
+                style={{width: '400px', height: '200px'}}
+                label="Comment : "
+                value={text}
+                variant='outlined'
+                multiline={true}
+              />
+              <button className={styles.recordingButton}
+               type="submit" 
+               onClick={() => console.log("your text :: " + text)}
+               style={{marginLeft: '10px'}}>Submit</button>
             </div>
           )
         }
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

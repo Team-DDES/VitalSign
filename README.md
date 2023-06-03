@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # A Web Demo for Camera-Based Physiological Sensing
 
 This respository is a web form demo for the research paper [Multi-Task Temporal Shift Attention Networks for On-Device Contactless Vitals Measurement](https://papers.nips.cc/paper/2020/file/e1228be46de6a0234ac22ded31417bc7-Paper.pdf). The paper has been accepted to NeurIPS 2020 (Oral, Top 1%).
@@ -32,3 +33,14 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
 
+=======
+# VitalSign
+
+- node 16.13.0
+- npx tsc
+- next dev
+
+## truffle
+
+truffle migrate --network development --reset
+>>>>>>> 130e897 (truffle setting)

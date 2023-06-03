@@ -28,7 +28,8 @@
     "react-chartjs-2": "^2.11.2",
     "react-dom": "^18.2.0",
     "react-webcam": "^7.1.0",
-    "sass": "1.26.10"
+    "sass": "1.26.10",
+    "truffle": "^5.9.3"
   },
   "devDependencies": {
     "@types/chart.js": "^2.9.28",

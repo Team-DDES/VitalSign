@@ -9638,10 +9638,36 @@
       "links": {},
       "address": "0x65d88DaaB0e6f059f906C4CC7C5EeD53c34AadEc",
       "transactionHash": "0x95f74fe1db6f11291f435f18de5fefb445564a597494f5b2577c67ebe5150416"
+    },
+    "80001": {
+      "events": {
+        "0x68bbbee1dcac77a21fb479fd48e8700b49a18eabd0dedaaab2b03921ffe5c6e1": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32[4]",
+              "name": "encryptedData",
+              "type": "bytes32[4]"
+            }
+          ],
+          "name": "BiometricDataUpdated",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xD1b4a572166154DBAb12e3a2668D4d1DC3481762",
+      "transactionHash": "0xed0966bb81020e83948bd5653d7399c72b01d1a285b4689e969820f2ad29b04a"
     }
   },
   "schemaVersion": "3.4.14",
-  "updatedAt": "2023-06-03T14:06:01.325Z",
+  "updatedAt": "2023-06-04T02:49:51.919Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

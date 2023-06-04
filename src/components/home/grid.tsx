@@ -5,17 +5,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoffee } from '@fortawesome/free-solid-svg-icons'
 
 
-export const PatientInfo = (/*(props: any)*/) => {
+export const PatientInfo = (props: map) => {
 
-    const patientData = new Map();
-    patientData.set('heartRate', 80);
-    patientData.set('respirationRate', 20);
-    patientData.set('stressLevel', 5);
-    patientData.set('spO2', 98);
-    patientData.set('comment', "Carefully");
-
-    //props = patientData;
-    const props = patientData
+    // const patientData = new Map();
+    // patientData.set('heartRate', 67.5);
+    // patientData.set('respirationRate', 11.25);
+    // patientData.set('stressLevel', 5);
+    // patientData.set('spO2', 98);
+    // patientData.set('comment', "Carefully");
+    //
+    // props = patientData;
+    // const props = patientData
 
     const fontStyle = {
         fontSize: '15px',

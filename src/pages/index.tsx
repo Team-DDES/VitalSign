@@ -20,6 +20,8 @@ import Preprocessor from '../lib/preprocessor';
 import Posprocessor from '../lib/posprocessor';
 // import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../contracts/config';
 import contractInfo from '../contracts/BiometricContract.json';
+import worldIdcontractInfo from "../contracts/Contract.json";
+import {Col, Container, Row} from "react-bootstrap";
 
 const postprocessor = new Posprocessor(tensorStore);
 const preprocessor = new Preprocessor(tensorStore, postprocessor);
@@ -85,7 +87,7 @@ type GraphProps = {
 };
 
 const Home = () => {
-  const {open, setOpen} = useIDKit();
+  // const {open, setOpen} = useIDKit();
   const webcamRef = React.useRef<any>(null);
   const intervalId = React.useRef<NodeJS.Timeout>();
   const coutdownIntervalId = React.useRef<NodeJS.Timeout>();
@@ -102,7 +104,8 @@ const Home = () => {
   const [account, setAccount] = useState<string>('');
   const [w3, setW3] = useState<Web3 | undefined>(undefined);
   const [contract, setContract] = useState<Contract | undefined>(undefined);
-  const [docterAddr, setDocterAddr] = useState<string>("");
+  const [worldContract, setworldContract] = useState<Contract | undefined>(undefined);
+  const [docterAddr, setDocterAddr] = useState<string>("0x4D7F9D84C58ae9f34301cA0C0a44dBe9c9662cA2");
   const [comment, setComment] = useState<string>("");
 
   const [isDoctor, setDoctor] = useState(false);
@@ -110,7 +113,7 @@ const Home = () => {
 
   useEffect(
     () => () => {
-      setOpen(true);
+      // setOpen(true);
       if (intervalId.current) {
         clearInterval(intervalId.current);
       }
@@ -142,15 +145,27 @@ const Home = () => {
       //   CONTRACT_ADDRESS
       // );
       // console.log(bioContract);
+      // @ts-ignore
       const bioContract = new w3Instance.eth.Contract(
         contractInfo.abi as AbiItem[],
-        contractInfo.networks['1337'].address
+        // @ts-ignore
+        contractInfo.networks['80001'].address
       );
+      // @ts-ignore
+      const worldIdcontract = new w3Instance.eth.Contract(
+        // @ts-ignore
+        worldIdcontractInfo.abi as AbiItem[],
+        // @ts-ignore
+        worldIdcontractInfo.networks['80001'].address
+      );
+      // console.bi
+
       // console.log(bioContract);
-      console.log(bioContract);
+      // console.log(bioContract);
       const docterComment = await bioContract.methods.getComment().call();
-      console.log(docterComment);
+      // console.log(docterComment);
       setContract(bioContract);
+      setworldContract(worldIdcontract);
     }
 
     load();
@@ -161,9 +176,9 @@ const Home = () => {
   }, [w3, account, contract]);
   const sendBiometric = async () => {
     // console.log(contract)
-    if (heartrate == 0 && resipration == 0) {
-      return;
-    }
+    // if (heartrate == 0 && resipration == 0) {
+    //   return;
+    // }
     let bioArray = [];
     const hr = w3?.utils.stringToHex(w3?.utils.rightPad(heartrate.toString(), 32));
     const rr = w3?.utils.stringToHex(w3?.utils.rightPad(resipration.toString(), 32));
@@ -279,6 +294,8 @@ const Home = () => {
       });
       setheartrate(hr);
       setresipration(rr);
+      patientData.set('heartRate', heartrate);
+      patientData.set('respirationRate', resipration);
       const result = iirFilter
         .filtfilt(rppgCumsum)
         .slice(0, rppgCumsum.length - 60);
@@ -303,14 +320,28 @@ const Home = () => {
       }
     ]
   };
+  const appid = Web3.utils.soliditySha3("app_staging_a414e2af064c52df63f1e1f8842b613e");
+  console.log(appid)
 
-  const handleProof = (result: ISuccessResult) =>
-    new Promise<void>(resolve => {
-      setTimeout(() => resolve(), 3000);
-      // NOTE: Example of how to decline the verification request and show an error message to the user
+
+  const handleProof = async (result: ISuccessResult) => {
+    console.log(account)
+    console.log(result)
+    const proof = result.proof;
+    const unpakcedMroot = w3?.eth.abi.encodeParameter('uint256', result.merkle_root);
+    const unpackedNullfierHash = w3?.eth.abi.encodeParameter('uint256', result.nullifier_hash);
+    const unpackedProof = w3?.eth.abi.decodeParameter('uint256[8]', proof);
+    console.log(unpakcedMroot);
+    console.log(unpackedNullfierHash);
+    console.log(unpackedProof);
+    const resultString = await worldContract?.methods.verifyAndExecute(account, unpakcedMroot, unpackedNullfierHash, unpackedProof).send({
+      "from": account
     });
+    console.log(resultString);
 
-  
+  }
+
+
 
   const onSuccess = (result: ISuccessResult) => {
     console.log(result);
@@ -338,11 +369,17 @@ const Home = () => {
   // };
 
   const patientData = new Map();
-  patientData.set('heartRate', 80);
-  patientData.set('respirationRate', 20);
+  patientData.set('heartRate', heartrate);
+  patientData.set('respirationRate', resipration);
   patientData.set('stressLevel', 5);
   patientData.set('spO2', 98);
   patientData.set('comment', "Carefully");
+
+  // const handleChange = (event) => {
+  //   setValue(event.target.value);
+  // };
+
+
 
   return (
     <div style={{overflow: 'auto'}}>
@@ -360,7 +397,28 @@ const Home = () => {
             5 seconds
           </h4>
           <p className={styles.countdown}>comment:{comment}</p>
-          <PatientInfo />
+          {/* <input> </input> */}
+          {/* <button> send comment</button> */}
+          {/* <p className={styles.countdown}>comment:{comment}</p> */}
+          <div className={styles.buttonContainer} >
+            <TextField
+              // style={{width: '300px', height: '200px'}}
+              label="Comment : "
+              // onChange={}
+              // value={text}
+              variant='outlined'
+              // multiline={true}
+            />
+            <button
+              className={styles.recordingButton}
+              style={{width: '400px'}}
+              onClick={sendBiometric}
+              type="button"
+            >
+              Send comment
+            </button>
+          </div>
+
           <div className={styles.buttonContainer} style={{marginTop: '20px'}}>
             {!isRecording && (
               <button
@@ -378,10 +436,25 @@ const Home = () => {
               type="button"
             >
               MetaMask
+            </button>
+            <button className={styles.recordingButton} type="button" onClick={sendBiometric}>
+              Send Information
+            </button>
+            <IDKitWidget
+              app_id="app_staging_a414e2af064c52df63f1e1f8842b613e" // obtain this from developer.worldcoin.org
+              action="submit"
+              onSuccess={(result) => handleProof(result)} // pass the proof to the API or your smart contract
+            >
+              {({open}) => <button className={styles.recordingButton} onClick={open}>World ID Login</button>}
+            </IDKitWidget>
+          </div>
+
+
             </button> */}
           </div>
           <div className={styles.buttonContainer} >
-            <button className={styles.recordingButton} style={{width: '800px'}} type="button" >
+            <button className={styles.recordingButton} style={{width: '800px'}} type="button"
+                    onClick={sendBiometric}>
                 Send Information
               </button>
           </div>
@@ -396,7 +469,7 @@ const Home = () => {
             //walletConnectProjectId="get_this_from_walletconnect_portal" // optional, obtain from WalletConnect Portal
             enableTelemetry
           >
-            {({ open }) => <button 
+            {({ open }) => <button
               className={styles.recordingButton}
               style={{width: '800px'}}
               onClick={open}>Verify Doctor
@@ -428,10 +501,10 @@ const Home = () => {
                   />
                 </div>
               </div>
-              </>
-          )
-          }
+            </>
+          )}
           {!isRecording && !!charData.rppg.length && (
+            <>
             <Line
               data={plotData}
               width={400}
@@ -459,6 +532,47 @@ const Home = () => {
                 }
               }}
             />
+            {/* <PatientInfo props={patientData} */}
+
+            {/* /> */}
+              <Container>
+                <Row>
+                  <Col className="text-center">
+                    <img src="images/ic_heart_rate.png" alt="hr" width="200" height="200"/>
+                    <div style={{
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                    }}>Heart Rate : {heartrate}</div>
+                  </Col>
+                  <Col className="text-center">
+                    <img src="images/ic_respiratory_rate.png" alt="rr" width="200" height="200"/>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                    }}>Respiration Rate : {resipration}</p>
+                  </Col>
+                </Row>
+                <br />
+                <Row>
+                  <Col className="text-center">
+                    <img src="images/ic_stress.png" alt="stress" width="200" height="200"/>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                    }}>Stress Level : 4</p>
+                  </Col>
+                  <Col className="text-center">
+                    <img src="images/ic_oxygen_saturation.png" alt="sp" width="200" height="200"/>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                    }}>SpO2 : 98</p>
+                  </Col>
+                </Row>
+                <br />
+                <h3 style={{fontSize: '20px', textAlign: 'center'}}>Comment : carefully</h3>
+              </Container>
+            </>
           )}
         { //Doctor View
           isDoctor && (
@@ -471,7 +585,7 @@ const Home = () => {
                 multiline={true}
               />
               <button className={styles.recordingButton}
-               type="submit" 
+               type="submit"
                onClick={() => console.log("your text :: " + text)}
                style={{marginLeft: '10px'}}>Submit</button>
             </div>

@@ -23,6 +23,13 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
+
+const PrivateKeyProvider = require("@truffle/hdwallet-provider");
+
+const METAMASK_EVALUATOR_PRIVATE_KEY="06dae5d8e686c484765aae9801c72c3154ab3f88312be5a41e947cc23f08c53b"
+const MUMBAI_API_KEY="e5p2vMdLjoC9WhI26pWlMYrOIgAhANcF"
+
+
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -33,6 +40,13 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
+
+  // const dotenv = require("dotenv");
+  // import dotenv from "dotenv";
+  // dotenv.config();
+
+
+  // const PrivateKeyProvider = require("@truffle/hdwallet-provider");
 
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
@@ -46,6 +60,14 @@ module.exports = {
       port: 7545, // Standard Ethereum port (default: none)
       network_id: '*', // Any network (default: none)
     },
+    mumbai:{
+      provider: () => new PrivateKeyProvider(METAMASK_EVALUATOR_PRIVATE_KEY, "https://polygon-mumbai.g.alchemy.com/v2/"+MUMBAI_API_KEY),
+      network_id:"*",
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+      networkCheckTimeoutnetworkCheckTimeout: 10000
+    }
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
